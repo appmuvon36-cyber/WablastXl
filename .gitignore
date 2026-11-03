@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+data/
+sessions/
+*.sqlite
+*.sqlite-*
+*.db
+*.log
+.DS_Store
