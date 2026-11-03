@@ -1,15 +1,10 @@
 # Upstream licensing and attribution
 
-WablastXl currently consumes the OpenWA application as an upstream container image:
+This repository imports and maintains a copy of the OpenWA application source.
 
-- Project: https://github.com/rmyndharis/OpenWA
-- License: MIT (see the upstream repository LICENSE file)
-- Image: ghcr.io/rmyndharis/openwa
+- Upstream project: https://github.com/rmyndharis/OpenWA
+- Imported upstream revision: 11bb9592fcb0d40377159dd6012527000136c6e4
+- Upstream license: MIT
+- The original upstream LICENSE file and copyright notices are retained in the source tree.
 
-This repository's deployment files do not relicense the upstream application. Any future copied or modified OpenWA source files must retain the upstream copyright and MIT license notices.
-
-
-## Imported upstream revision
-
-- Upstream repository: https://github.com/rmyndharis/OpenWA
-- Imported commit: 11bb9592fcb0d40377159dd6012527000136c6e4
+WablastXl-specific deployment documentation and configuration are maintained alongside the imported upstream source. The MIT license text in LICENSE governs the upstream source as provided by its authors; do not remove or alter upstream attribution.
