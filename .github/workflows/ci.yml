@@ -106,11 +106,95 @@ jobs:
       - run: cd dashboard && npm test
       - run: cd dashboard && npm run build
 
+  postgres-migrations:
+    name: PostgreSQL migration validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: openwa
+          POSTGRES_PASSWORD: openwa-ci-password
+          POSTGRES_DB: openwa
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U openwa -d openwa"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_TYPE: postgres
+      DATABASE_HOST: localhost
+      DATABASE_PORT: "5432"
+      DATABASE_USERNAME: openwa
+      DATABASE_PASSWORD: openwa-ci-password
+      DATABASE_NAME: openwa
+      DATABASE_SYNCHRONIZE: "false"
+      POSTGRES_SCHEMA: public
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Apply the full migration chain and verify PostgreSQL UUID defaults
+        run: npm run test:pg-smoke
+
+  docker-build-smoke:
+    name: Docker build and runtime smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Build production image
+        run: docker build --pull -t wablastxl:ci .
+      - name: Start container and verify readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker volume create wablastxl-ci-data >/dev/null
+          cleanup() {
+            docker logs wablastxl-ci || true
+            docker rm -f wablastxl-ci >/dev/null 2>&1 || true
+            docker volume rm wablastxl-ci-data >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          docker run -d --name wablastxl-ci -p 2785:2785 \\
+            -e NODE_ENV=production \\
+            -e PORT=2785 \\
+            -e DATABASE_TYPE=sqlite \\
+            -e DATABASE_NAME=/app/data/openwa.sqlite \\
+            -e MAIN_DATABASE_NAME=/app/data/main.sqlite \\
+            -e AUTO_START_SESSIONS=false \\
+            -e API_MASTER_KEY=ci-only-not-a-production-secret \\
+            -e SESSION_DATA_PATH=/app/data/sessions \\
+            -e STORAGE_TYPE=local \\
+            -e STORAGE_LOCAL_PATH=/app/data/media \\
+            -v wablastxl-ci-data:/app/data \\
+            wablastxl:ci
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:2785/api/health/ready >/dev/null; then
+              echo "WablastXl readiness endpoint is healthy."
+              exit 0
+            fi
+            if [ "$(docker inspect -f '{{.State.Running}}' wablastxl-ci 2>/dev/null || true)" != "true" ]; then
+              echo "Container exited before becoming ready."
+              exit 1
+            fi
+            sleep 5
+          done
+          echo "Container did not become ready within 5 minutes."
+          exit 1
+
   build:
     name: Backend production build
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [lint-and-contracts, unit-and-e2e-tests, dashboard]
+    needs: [lint-and-contracts, unit-and-e2e-tests, dashboard, postgres-migrations, docker-build-smoke]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
