@@ -1,0 +1,121 @@
+name: WablastXl CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wablastxl-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  lint-and-contracts:
+    name: Lint, typecheck and API contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit -p tsconfig.json
+      - run: npm run format:check
+      - run: npm run check:versions
+      - run: npm run check:dockerignore
+      - run: npm run openapi:check
+      - run: npm run check:sdk-routes
+      - run: npm run check:sdk-coverage
+      - run: npm run check:sdk-events
+      - run: npm run check:sdk-docs
+      - run: npm run check:contract-shapes
+
+  security-audit:
+    name: Dependency security audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            dashboard/package-lock.json
+      - run: npm ci
+      - run: npm run check:audit
+      - run: cd dashboard && npm ci
+      - run: cd dashboard && npm audit --audit-level=high
+      - run: cd sdk/javascript && npm audit --audit-level=high
+
+  unit-and-e2e-tests:
+    name: Unit, docs and e2e tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm test -- --coverage
+      - run: npm run test:docs
+      - run: npm run test:scripts
+      - run: npm run test:e2e
+        env:
+          REDIS_HOST: localhost
+          REDIS_PORT: "6379"
+
+  dashboard:
+    name: Dashboard lint, typecheck and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - run: cd dashboard && npm ci
+      - run: cd dashboard && npm run lint
+      - run: cd dashboard && npm run typecheck
+      - run: cd dashboard && npm run i18n:check
+      - run: cd dashboard && npm test
+      - run: cd dashboard && npm run build
+
+  build:
+    name: Backend production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [lint-and-contracts, unit-and-e2e-tests, dashboard]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
