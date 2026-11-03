@@ -7,3 +7,9 @@ WablastXl currently consumes the OpenWA application as an upstream container ima
 - Image: ghcr.io/rmyndharis/openwa
 
 This repository's deployment files do not relicense the upstream application. Any future copied or modified OpenWA source files must retain the upstream copyright and MIT license notices.
+
+
+## Imported upstream revision
+
+- Upstream repository: https://github.com/rmyndharis/OpenWA
+- Imported commit: 11bb9592fcb0d40377159dd6012527000136c6e4
