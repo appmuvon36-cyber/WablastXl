@@ -50,7 +50,7 @@ jobs:
 
           printf '\n\n## Imported upstream revision\n\n- Upstream repository: https://github.com/rmyndharis/OpenWA\n- Imported commit: %s\n' "$(git -C /tmp/openwa rev-parse HEAD)" >> /tmp/wablastxl-overlay/UPSTREAM-LICENSE.md
 
-          for file in README.md railway.json .env.example UPSTREAM-LICENSE.md .dockerignore .gitignore; do
+          for file in README.md railway.json .env.wablastxl.example UPSTREAM-LICENSE.md .dockerignore .gitignore; do
             if [ -f "/tmp/wablastxl-overlay/$file" ]; then cp "/tmp/wablastxl-overlay/$file" "$file"; fi
           done
 
