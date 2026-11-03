@@ -52,3 +52,17 @@ OpenWA uses an unofficial WhatsApp Web-based integration, not the official Meta 
 - [Bahasa Indonesia AI system-prompt baseline](docs/wablastxl/AI-SYSTEM-PROMPT-ID.md)
 
 Railway remains intentionally postponed until source CI, integration configuration, and the operational QA gates are complete.
+
+## MCP server security
+
+The MCP server is read-only by default and exposes **26 read-only tools**. The complete MCP surface contains **52 tools**. Keep the default read-only posture for discovery and reporting. Only set `MCP_READONLY=false` after reviewing the write-capable tools, restricting access to trusted operators, and protecting the MCP endpoint with the deployment's authentication and network controls.
+
+## Docker storage profile guidance
+
+When the dashboard uses its built-in storage, do not also start the `minio` or `full` profile. Choose one storage owner to avoid conflicting configuration and duplicate services.
+
+## WablastXl operating notes
+
+WablastXl retains the upstream OpenWA application, while this repository adds its own operating and integration documentation. See `docs/wablastxl/` for the customer-agent design, plugin setup, broadcast consent requirements, and pre-deployment QA gates.
+
+Railway deployment is intentionally postponed. No Railway project, service, volume, or deployment should be created until explicitly approved.
