@@ -14,3 +14,9 @@ WablastXl-specific deployment documentation and configuration are maintained alo
 
 - Upstream repository: https://github.com/rmyndharis/OpenWA
 - Imported commit: 11bb9592fcb0d40377159dd6012527000136c6e4
+
+
+## Imported upstream revision
+
+- Upstream repository: https://github.com/rmyndharis/OpenWA
+- Imported commit: 11bb9592fcb0d40377159dd6012527000136c6e4
