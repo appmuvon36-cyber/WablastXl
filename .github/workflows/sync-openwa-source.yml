@@ -29,7 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/wablastxl-overlay
-          for file in README.md railway.json .env.example UPSTREAM-LICENSE.md .dockerignore .gitignore; do
+          for file in README.md railway.json .env.wablastxl.example UPSTREAM-LICENSE.md .dockerignore .gitignore; do
             if [ -f "$file" ]; then cp "$file" "/tmp/wablastxl-overlay/$file"; fi
           done
 
