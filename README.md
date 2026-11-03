@@ -42,3 +42,13 @@ OpenWA uses an unofficial WhatsApp Web-based integration, not the official Meta 
 - OpenWA: https://github.com/rmyndharis/OpenWA
 - OpenWA plugins: https://github.com/rmyndharis/OpenWA-plugins
 - Railway OpenWA template: https://railway.com/deploy/openwa-w-postgres-redis-and-minio
+
+
+## WablastXl operating guides
+
+- [AI Customer Agent architecture and plugin selection](docs/wablastxl/AI-CUSTOMER-AGENT.md)
+- [Broadcast consent, suppression, and campaign controls](docs/wablastxl/BROADCAST-COMPLIANCE.md)
+- [Operations and QA gates](docs/wablastxl/OPERATIONS-AND-QA.md)
+- [Bahasa Indonesia AI system-prompt baseline](docs/wablastxl/AI-SYSTEM-PROMPT-ID.md)
+
+Railway remains intentionally postponed until source CI, integration configuration, and the operational QA gates are complete.
