@@ -36,7 +36,7 @@ jobs:
           git clone --depth 1 --branch main https://github.com/rmyndharis/OpenWA.git /tmp/openwa
           rsync -a --delete \
             --exclude='.git/' \
-            --exclude='.github/workflows/sync-openwa-source.yml' \
+            --exclude='.github/workflows/' \
             /tmp/openwa/ ./
 
           # Fail closed if the import is incomplete or the upstream layout changes.
