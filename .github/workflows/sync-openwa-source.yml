@@ -39,6 +39,17 @@ jobs:
             --exclude='.github/workflows/sync-openwa-source.yml' \
             /tmp/openwa/ ./
 
+          # Fail closed if the import is incomplete or the upstream layout changes.
+          test -s package.json
+          test -s package-lock.json
+          test -s Dockerfile
+          test -s src/main.ts
+          test -s dashboard/package.json
+          test -s LICENSE
+          node -e "const p=require('./package.json'); if (!p.scripts || !p.scripts.build || !p.scripts.test) process.exit(1); console.log('Imported OpenWA version:', p.version || 'unspecified')"
+
+          printf '\n\n## Imported upstream revision\n\n- Upstream repository: https://github.com/rmyndharis/OpenWA\n- Imported commit: %s\n' "$(git -C /tmp/openwa rev-parse HEAD)" >> /tmp/wablastxl-overlay/UPSTREAM-LICENSE.md
+
           for file in README.md railway.json .env.example UPSTREAM-LICENSE.md .dockerignore .gitignore; do
             if [ -f "/tmp/wablastxl-overlay/$file" ]; then cp "/tmp/wablastxl-overlay/$file" "$file"; fi
           done
