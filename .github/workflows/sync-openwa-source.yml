@@ -30,6 +30,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/wablastxl-overlay
+          if [ -d docs/wablastxl ]; then
+            mkdir -p /tmp/wablastxl-overlay/docs
+            cp -a docs/wablastxl /tmp/wablastxl-overlay/docs/
+          fi
           for file in README.md railway.json .env.wablastxl.example UPSTREAM-LICENSE.md .dockerignore .gitignore; do
             if [ -f "$file" ]; then cp "$file" "/tmp/wablastxl-overlay/$file"; fi
           done
@@ -54,6 +58,10 @@ jobs:
           for file in README.md railway.json .env.wablastxl.example UPSTREAM-LICENSE.md .dockerignore .gitignore; do
             if [ -f "/tmp/wablastxl-overlay/$file" ]; then cp "/tmp/wablastxl-overlay/$file" "$file"; fi
           done
+          if [ -d /tmp/wablastxl-overlay/docs/wablastxl ]; then
+            mkdir -p docs
+            cp -a /tmp/wablastxl-overlay/docs/wablastxl docs/
+          fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
