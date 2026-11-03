@@ -1,4 +1,5 @@
 name: Import and sync OpenWA source
+# Keep WablastXl deployment settings during source sync.
 
 on:
   push:
